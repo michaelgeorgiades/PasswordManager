@@ -14,7 +14,9 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       className={`
-        bg-white rounded-lg shadow-md border border-gray-200
+        bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-md
+        dark:border dark:border-gray-700/50
+        transition-shadow duration-200
         ${padding ? 'p-6' : ''}
         ${className}
       `}

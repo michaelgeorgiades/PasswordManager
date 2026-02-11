@@ -7,7 +7,9 @@
       "Bash(docker compose:*)",
       "Bash(ls:*)",
       "Bash(\"C:/Program Files/PostgreSQL/18/bin/psql.exe\":*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite build)"
     ]
   }
 }

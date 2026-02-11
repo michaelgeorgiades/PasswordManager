@@ -108,7 +108,7 @@ export const SavePasswordForm: React.FC<SavePasswordFormProps> = ({
         size="md"
       >
         <div className="space-y-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Your password has been saved. Share this link with anyone who needs access:
           </p>
 
@@ -117,13 +117,13 @@ export const SavePasswordForm: React.FC<SavePasswordFormProps> = ({
               type="text"
               value={shareableLink}
               readOnly
-              className="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none"
+              className="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-mono text-gray-700 dark:text-gray-300 focus:outline-none"
             />
             <CopyButton text={shareableLink} />
           </div>
 
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-            <p className="text-sm text-yellow-800">
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl p-3">
+            <p className="text-sm text-amber-800 dark:text-amber-300">
               <strong>Important:</strong> Anyone with this link can access the password.
               Share it securely!
             </p>
