@@ -1,0 +1,42 @@
+import { Router } from 'express';
+import { body } from 'express-validator';
+import { AuthController } from '../controllers/auth.controller';
+import { authenticate } from '../middleware/auth.middleware';
+import { loginLimiter } from '../middleware/rateLimiter.middleware';
+import { runValidations, validate } from '../middleware/validation.middleware';
+
+const router = Router();
+
+// Login
+router.post(
+  '/login',
+  loginLimiter,
+  runValidations([
+    body('username').trim().notEmpty().withMessage('Username is required'),
+    body('password').notEmpty().withMessage('Password is required'),
+  ]),
+  validate,
+  (req, res, next) => {
+    AuthController.login(req, res).catch(next);
+  }
+);
+
+// Get current user
+router.get(
+  '/me',
+  authenticate,
+  (req, res, next) => {
+    AuthController.getCurrentUser(req, res).catch(next);
+  }
+);
+
+// Logout
+router.post(
+  '/logout',
+  authenticate,
+  (req, res, next) => {
+    AuthController.logout(req, res).catch(next);
+  }
+);
+
+export default router;
