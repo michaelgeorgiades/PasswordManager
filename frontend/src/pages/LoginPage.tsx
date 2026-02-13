@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -7,11 +7,7 @@ import { Input } from '../components/common/Input';
 import { Card } from '../components/common/Card';
 import toast from 'react-hot-toast';
 
-const LockIcon = () => (
-  <svg className="w-12 h-12 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-  </svg>
-);
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const SunIcon = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -25,16 +21,73 @@ const MoonIcon = () => (
   </svg>
 );
 
+const ChevronIcon: React.FC<{ open: boolean }> = ({ open }) => (
+  <svg
+    className={`w-4 h-4 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+  </svg>
+);
+
 export const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [showLocalLogin, setShowLocalLogin] = useState(false);
+  const { login, loginWithGoogle } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const googleButtonRef = useRef<HTMLDivElement>(null);
 
   const from = (location.state as any)?.from?.pathname || '/dashboard';
+
+  const handleGoogleCallback = useCallback(async (response: any) => {
+    setGoogleLoading(true);
+    try {
+      await loginWithGoogle(response.credential);
+      toast.success('Login successful!');
+      navigate(from, { replace: true });
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Google sign-in failed');
+    } finally {
+      setGoogleLoading(false);
+    }
+  }, [loginWithGoogle, navigate, from]);
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return;
+
+    // Load Google Identity Services script
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      if (window.google && googleButtonRef.current) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCallback,
+        });
+        window.google.accounts.id.renderButton(googleButtonRef.current, {
+          theme: theme === 'dark' ? 'filled_black' : 'outline',
+          size: 'large',
+          width: googleButtonRef.current.offsetWidth,
+          text: 'signin_with',
+        });
+      }
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, [handleGoogleCallback, theme]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,53 +118,76 @@ export const LoginPage: React.FC = () => {
       <Card className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-primary-50 dark:bg-primary-900/20 rounded-2xl">
-              <LockIcon />
-            </div>
+            <img src="/tyme-global.png" alt="Tyme Global" className="w-16 h-16" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Password Pal
+            Tyme Global Password Manager
           </h1>
           <p className="text-gray-500 dark:text-gray-400">
             Secure password management made simple
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Username"
-            type="text"
-            placeholder="Enter your username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            autoFocus
-          />
+        {/* Google Sign-In (primary) */}
+        {GOOGLE_CLIENT_ID && (
+          <div ref={googleButtonRef} className="flex justify-center">
+            {googleLoading && (
+              <div className="flex items-center justify-center py-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary-600 border-t-transparent"></div>
+                <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">Signing in...</span>
+              </div>
+            )}
+          </div>
+        )}
 
-          <Input
-            label="Password"
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-
-          <Button
-            type="submit"
-            fullWidth
-            loading={loading}
-            disabled={!username || !password}
+        {/* Divider + collapsible local login */}
+        <div className="mt-6">
+          <button
+            type="button"
+            onClick={() => setShowLocalLogin(!showLocalLogin)}
+            className="w-full flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
           >
-            Sign In
-          </Button>
-        </form>
+            <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
+            <span className="flex items-center gap-1 px-2 whitespace-nowrap">
+              Sign in with username & password
+              <ChevronIcon open={showLocalLogin} />
+            </span>
+            <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
+          </button>
 
-        <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>
-            Default credentials: <strong className="text-gray-700 dark:text-gray-300">admin</strong> / <strong className="text-gray-700 dark:text-gray-300">Admin123!</strong>
-          </p>
+          {showLocalLogin && (
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+              <Input
+                label="Username"
+                type="text"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                autoFocus
+              />
+
+              <Input
+                label="Password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+
+              <Button
+                type="submit"
+                fullWidth
+                loading={loading}
+                disabled={!username || !password}
+              >
+                Sign In
+              </Button>
+            </form>
+          )}
         </div>
+
       </Card>
     </div>
   );

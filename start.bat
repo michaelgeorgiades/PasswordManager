@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo Password Pal - Startup Script
+echo Tyme Global Password Manager - Startup Script
 echo ========================================
 echo.
 

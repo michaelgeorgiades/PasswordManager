@@ -12,31 +12,44 @@ const runMigrations = async () => {
   }
 
   try {
-    const sqlPath = path.join(__dirname, 'init.sql');
-    const sql = fs.readFileSync(sqlPath, 'utf8');
+    // Collect all SQL files to run in order
+    const sqlFiles = [
+      path.join(__dirname, 'init.sql'),
+      path.join(__dirname, 'migrations', '002_add_google_sso.sql'),
+    ];
 
-    // Split by semicolon, respecting $$ dollar-quoted strings
-    const statements: string[] = [];
-    let current = '';
-    let inDollarQuote = false;
-    for (let i = 0; i < sql.length; i++) {
-      if (sql[i] === '$' && sql[i + 1] === '$') {
-        inDollarQuote = !inDollarQuote;
-        current += '$$';
-        i++;
-      } else if (sql[i] === ';' && !inDollarQuote) {
-        const trimmed = current.trim();
-        if (trimmed.length > 0) statements.push(trimmed);
-        current = '';
-      } else {
-        current += sql[i];
+    for (const sqlPath of sqlFiles) {
+      if (!fs.existsSync(sqlPath)) {
+        console.warn(`⚠️ Migration file not found, skipping: ${sqlPath}`);
+        continue;
       }
-    }
-    const last = current.trim();
-    if (last.length > 0) statements.push(last);
 
-    for (const statement of statements) {
-      await query(statement);
+      console.log(`Running: ${path.basename(sqlPath)}`);
+      const sql = fs.readFileSync(sqlPath, 'utf8');
+
+      // Split by semicolon, respecting $$ dollar-quoted strings
+      const statements: string[] = [];
+      let current = '';
+      let inDollarQuote = false;
+      for (let i = 0; i < sql.length; i++) {
+        if (sql[i] === '$' && sql[i + 1] === '$') {
+          inDollarQuote = !inDollarQuote;
+          current += '$$';
+          i++;
+        } else if (sql[i] === ';' && !inDollarQuote) {
+          const trimmed = current.trim();
+          if (trimmed.length > 0) statements.push(trimmed);
+          current = '';
+        } else {
+          current += sql[i];
+        }
+      }
+      const last = current.trim();
+      if (last.length > 0) statements.push(last);
+
+      for (const statement of statements) {
+        await query(statement);
+      }
     }
 
     console.log('✅ Database migrations completed successfully');

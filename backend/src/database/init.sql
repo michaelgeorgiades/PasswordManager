@@ -62,8 +62,10 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_passwords_updated_at ON passwords;
 CREATE TRIGGER update_passwords_updated_at BEFORE UPDATE ON passwords
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

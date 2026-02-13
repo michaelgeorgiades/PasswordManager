@@ -117,12 +117,10 @@ export const RetrievePage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-primary-50 dark:bg-primary-900/20 rounded-2xl">
-              <ShieldIcon />
-            </div>
+            <img src="/tyme-global.png" alt="Tyme Global" className="w-16 h-16" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Password Pal
+            Tyme Global Password Manager
           </h1>
           <p className="text-gray-500 dark:text-gray-400">Secure password retrieval</p>
         </div>

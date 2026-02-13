@@ -21,7 +21,7 @@ export class AdminController {
 
       // Get users
       const result = await query(
-        `SELECT id, username, email, role, is_active, created_by, created_at, updated_at, last_login
+        `SELECT id, username, email, role, auth_provider, is_active, created_by, created_at, updated_at, last_login
          FROM users
          ORDER BY created_at DESC
          LIMIT $1 OFFSET $2`,
@@ -52,11 +52,22 @@ export class AdminController {
         throw new AppError('Authentication required', 401);
       }
 
-      const { username, email, password, role } = req.body;
+      const { username, email, password, role, auth_provider } = req.body;
+      const provider = auth_provider || 'local';
 
       // Validate role
       if (!['admin', 'user'].includes(role)) {
         throw new AppError('Invalid role', 400);
+      }
+
+      // Validate auth_provider
+      if (!['local', 'google', 'both'].includes(provider)) {
+        throw new AppError('Invalid auth provider', 400);
+      }
+
+      // Password is required for local and both providers
+      if (provider !== 'google' && !password) {
+        throw new AppError('Password is required for local authentication', 400);
       }
 
       // Check if username or email already exists
@@ -69,15 +80,15 @@ export class AdminController {
         throw new AppError('Username or email already exists', 400);
       }
 
-      // Hash password
-      const passwordHash = await bcrypt.hash(password, 12);
+      // Hash password if provided
+      const passwordHash = password ? await bcrypt.hash(password, 12) : null;
 
       // Create user
       const result = await query(
-        `INSERT INTO users (username, email, password_hash, role, created_by)
-         VALUES ($1, $2, $3, $4, $5)
-         RETURNING id, username, email, role, is_active, created_by, created_at, updated_at`,
-        [username, email, passwordHash, role, req.user.userId]
+        `INSERT INTO users (username, email, password_hash, role, auth_provider, created_by)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING id, username, email, role, auth_provider, is_active, created_by, created_at, updated_at`,
+        [username, email, passwordHash, role, provider, req.user.userId]
       );
 
       res.status(201).json({
@@ -145,7 +156,7 @@ export class AdminController {
         `UPDATE users
          SET ${updates.join(', ')}
          WHERE id = $${paramIndex}
-         RETURNING id, username, email, role, is_active, created_by, created_at, updated_at`,
+         RETURNING id, username, email, role, auth_provider, is_active, created_by, created_at, updated_at`,
         values
       );
 

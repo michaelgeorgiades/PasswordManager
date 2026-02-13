@@ -21,6 +21,19 @@ router.post(
   }
 );
 
+// Google SSO Login
+router.post(
+  '/google',
+  loginLimiter,
+  runValidations([
+    body('idToken').notEmpty().withMessage('Google ID token is required'),
+  ]),
+  validate,
+  (req, res, next) => {
+    AuthController.googleLogin(req, res).catch(next);
+  }
+);
+
 // Get current user
 router.get(
   '/me',

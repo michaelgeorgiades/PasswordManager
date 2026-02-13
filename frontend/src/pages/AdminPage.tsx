@@ -5,7 +5,7 @@ import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import { Modal } from '../components/common/Modal';
 import { api } from '../services/api';
-import { User, CreateUserDto, AdminStats, AccessLog } from '@passwordpal/shared';
+import { User, CreateUserDto, AdminStats, AccessLog, AuthProvider } from '@passwordpal/shared';
 import toast from 'react-hot-toast';
 
 const UsersIcon = () => (
@@ -173,6 +173,7 @@ const UsersTab: React.FC = () => {
     email: '',
     password: '',
     role: 'user',
+    auth_provider: 'local',
   });
 
   useEffect(() => {
@@ -198,7 +199,7 @@ const UsersTab: React.FC = () => {
       await api.createUser(formData);
       toast.success('User created successfully');
       setShowCreateModal(false);
-      setFormData({ username: '', email: '', password: '', role: 'user' });
+      setFormData({ username: '', email: '', password: '', role: 'user', auth_provider: 'local' });
       fetchUsers();
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to create user');
@@ -262,6 +263,9 @@ const UsersTab: React.FC = () => {
                   Role
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                  Auth
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
@@ -290,6 +294,19 @@ const UsersTab: React.FC = () => {
                       }`}
                     >
                       {user.role}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                        user.auth_provider === 'google'
+                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                          : user.auth_provider === 'both'
+                          ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                          : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                      }`}
+                    >
+                      {user.auth_provider || 'local'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -351,14 +368,30 @@ const UsersTab: React.FC = () => {
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             required
           />
-          <Input
-            label="Password"
-            type="password"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            helperText="Min 8 chars, must include uppercase, lowercase, number, and symbol"
-            required
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Auth Method
+            </label>
+            <select
+              value={formData.auth_provider || 'local'}
+              onChange={(e) => setFormData({ ...formData, auth_provider: e.target.value as AuthProvider, password: e.target.value === 'google' ? '' : formData.password })}
+              className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm transition-colors"
+            >
+              <option value="local">Local (Username & Password)</option>
+              <option value="google">Google SSO Only</option>
+              <option value="both">Both (Local + Google)</option>
+            </select>
+          </div>
+          {formData.auth_provider !== 'google' && (
+            <Input
+              label="Password"
+              type="password"
+              value={formData.password || ''}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              helperText="Min 8 chars, must include uppercase, lowercase, number, and symbol"
+              required
+            />
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Role

@@ -8,6 +8,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   login: (username: string, password: string) => Promise<void>;
+  loginWithGoogle: (idToken: string) => Promise<void>;
   logout: () => void;
   loading: boolean;
 }
@@ -42,6 +43,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('user', JSON.stringify(response.user));
   };
 
+  const loginWithGoogle = async (idToken: string) => {
+    const response = await api.googleLogin(idToken);
+
+    setToken(response.token);
+    setUser(response.user);
+
+    localStorage.setItem('token', response.token);
+    localStorage.setItem('user', JSON.stringify(response.user));
+  };
+
   const logout = () => {
     api.logout().catch(() => {
       // Ignore errors on logout
@@ -59,6 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAuthenticated: !!token && !!user,
     isAdmin: user?.role === 'admin',
     login,
+    loginWithGoogle,
     logout,
     loading,
   };

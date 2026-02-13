@@ -61,6 +61,11 @@ class ApiService {
     return response.data.data;
   }
 
+  async googleLogin(idToken: string): Promise<AuthResponse> {
+    const response = await this.client.post<{ data: AuthResponse }>('/auth/google', { idToken });
+    return response.data.data;
+  }
+
   async getCurrentUser(): Promise<User> {
     const response = await this.client.get<{ data: User }>('/auth/me');
     return response.data.data;

@@ -80,8 +80,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link to="/dashboard" className="flex items-center space-x-2.5">
-              <ShieldIcon />
-              <span className="text-xl font-bold text-gray-900 dark:text-white">Password Pal</span>
+              <img src="/tyme-global.png" alt="Tyme Global" className="w-8 h-8" />
+              <span className="text-xl font-bold text-gray-900 dark:text-white">Tyme Global Password Manager</span>
             </Link>
 
             {/* Desktop Navigation */}

@@ -21,11 +21,13 @@ router.post(
     body('username').trim().notEmpty().withMessage('Username is required'),
     body('email').isEmail().withMessage('Invalid email address'),
     body('password')
+      .if(body('auth_provider').not().equals('google'))
       .isLength({ min: 8 })
       .withMessage('Password must be at least 8 characters')
       .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
       .withMessage('Password must contain uppercase, lowercase, number, and special character'),
     body('role').isIn(['admin', 'user']).withMessage('Role must be admin or user'),
+    body('auth_provider').optional().isIn(['local', 'google', 'both']).withMessage('Invalid auth provider'),
   ]),
   validate,
   (req, res, next) => {

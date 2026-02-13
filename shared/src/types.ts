@@ -1,11 +1,13 @@
 // User Types
 export type UserRole = 'admin' | 'user';
+export type AuthProvider = 'local' | 'google' | 'both';
 
 export interface User {
   id: string;
   username: string;
   email: string;
   role: UserRole;
+  auth_provider: AuthProvider;
   is_active: boolean;
   created_by?: string;
   created_at: Date;
@@ -16,8 +18,9 @@ export interface User {
 export interface CreateUserDto {
   username: string;
   email: string;
-  password: string;
+  password?: string;
   role: UserRole;
+  auth_provider?: AuthProvider;
 }
 
 export interface UpdateUserDto {
@@ -31,6 +34,10 @@ export interface UpdateUserDto {
 export interface LoginDto {
   username: string;
   password: string;
+}
+
+export interface GoogleLoginDto {
+  idToken: string;
 }
 
 export interface AuthResponse {
