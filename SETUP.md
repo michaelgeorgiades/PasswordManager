@@ -204,3 +204,24 @@ For production deployment:
 ## Support
 
 For issues or questions, please check the main README.md or create an issue in the repository.
+
+
+------------
+
+# Install PM2 globally
+  npm install -g pm2
+
+  # Start the backend
+  pm2 start backend/dist/server.js --name passwordpal
+
+  # Useful commands
+  pm2 status          # check if it's running
+  pm2 logs passwordpal # view logs
+  pm2 restart passwordpal
+  pm2 stop passwordpal
+
+  # Auto-start on server reboot
+  pm2 startup
+  pm2 save
+
+  This keeps it running in the background, auto-restarts on crashes, and persists across reboots.

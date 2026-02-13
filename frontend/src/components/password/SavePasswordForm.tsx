@@ -32,7 +32,7 @@ export const SavePasswordForm: React.FC<SavePasswordFormProps> = ({
       const data = {
         password,
         title: formData.title || undefined,
-        expires_at: formData.expires_at ? new Date(formData.expires_at).toISOString() : undefined,
+        expires_at: formData.expires_at ? new Date(formData.expires_at) : undefined,
         max_access_count: formData.max_access_count ? parseInt(formData.max_access_count) : undefined,
       };
 
