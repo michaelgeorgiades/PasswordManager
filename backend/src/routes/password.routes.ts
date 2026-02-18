@@ -39,12 +39,11 @@ router.post(
   }
 );
 
-// Retrieve password by GUID (admin only)
+// Retrieve password by GUID (any authenticated user)
 router.get(
   '/:guid',
   retrievalLimiter,
   authenticate,
-  requireAdmin,
   runValidations([
     param('guid').isUUID().withMessage('Invalid GUID format'),
   ]),
