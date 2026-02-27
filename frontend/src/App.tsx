@@ -20,7 +20,7 @@ function App() {
             <Route
               path="/retrieve/:guid"
               element={
-                <ProtectedRoute adminOnly>
+                <ProtectedRoute>
                   <RetrievePage />
                 </ProtectedRoute>
               }
