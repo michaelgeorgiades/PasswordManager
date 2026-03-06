@@ -82,13 +82,13 @@ export const GeneratePage: React.FC = () => {
                   Enter Your Password
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  Enter the password or secret you want to share securely.
+                  Enter the password or secret you want to share securely. You can use multiple lines — for example, a username on one line and the password on another.
                 </p>
                 <textarea
                   value={customPassword}
                   onChange={(e) => setCustomPassword(e.target.value)}
-                  placeholder="Enter your password or secret text..."
-                  rows={4}
+                  placeholder={"Enter your password or secret text...\n\ne.g.\nUsername: john@example.com\nPassword: mypassword123"}
+                  rows={6}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none transition-colors"
                 />
               </>

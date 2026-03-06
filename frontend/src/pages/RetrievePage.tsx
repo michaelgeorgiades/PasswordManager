@@ -134,16 +134,25 @@ export const RetrievePage: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Password
             </label>
-            <div className="flex items-center space-x-2">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={passwordData?.password || ''}
-                readOnly
-                className="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl font-mono text-lg text-gray-900 dark:text-gray-100 focus:outline-none"
-              />
+            <div className="flex items-start space-x-2">
+              {showPassword ? (
+                <textarea
+                  value={passwordData?.password || ''}
+                  readOnly
+                  rows={Math.max(2, (passwordData?.password || '').split('\n').length)}
+                  className="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl font-mono text-lg text-gray-900 dark:text-gray-100 focus:outline-none resize-none"
+                />
+              ) : (
+                <input
+                  type="password"
+                  value={passwordData?.password || ''}
+                  readOnly
+                  className="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl font-mono text-lg text-gray-900 dark:text-gray-100 focus:outline-none"
+                />
+              )}
               <button
                 onClick={() => setShowPassword(!showPassword)}
-                className="px-4 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-xl transition-colors text-gray-600 dark:text-gray-300"
+                className="px-4 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-xl transition-colors text-gray-600 dark:text-gray-300 flex-shrink-0"
                 title={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOffIcon /> : <EyeIcon />}
